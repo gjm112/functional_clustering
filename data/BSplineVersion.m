@@ -1,6 +1,8 @@
 % constants and parameters
 clear;
 H1_weight = 1e3;
+use_optimal_knots = true; 
+flipgames = true; 
 
 % load data
 T = readtable("NFL2023season_win_prob.csv");
@@ -42,22 +44,50 @@ end
 T = rmmissing(T);
 minpoints = min(numpoints);
 
+% Flip the games so that we are always plotting the loser 
+is_game_flipped = zeros(numgames,1);
+if flipgames
+    for i = 1:numgames
+        gamedata = T(T.game_id == games(i),:);
+        if gamedata.home_wp(end) > 0.9
+            % home team won, so flip home and away
+            gamedata.home_wp = 1-gamedata.home_wp;
+            is_game_flipped(i) = true;
+            %overwrite old data with new processed data
+            T(T.game_id == games(i),:) = gamedata;
+        end
+    end
+end
 % With this we can generate a set of knots for the b-spline
 
 order = 4; %4 means cubic
-knots = linspace(0,3600,floor(0.7*minpoints));
+point_ratio = 0.4;
+knots = linspace(0,3600,floor(point_ratio*minpoints));
 
 % generate the b-spline least-square approximations
-for i = 1:numgames
-  gamedata = T(T.game_id == games(i),:);
-  splines(i) = spap2(augknt(knots,order),order,gamedata.game_seconds_remaining,gamedata.home_wp);
+
+if use_optimal_knots
+  for i = 1:numgames
+    gamedata = T(T.game_id == games(i),:);
+    splines(i) = spap2(floor(point_ratio*minpoints),order,gamedata.game_seconds_remaining,gamedata.home_wp);
+    if any(abs(splines(i).coefs) > 1.2) 
+      %maybe knot sequence isn't amazing so recompute
+     splines(i) = spap2(newknt(splines(i)),order,gamedata.game_seconds_remaining,gamedata.home_wp);
+    end
+  end
+else
+  for i = 1:numgames
+    gamedata = T(T.game_id == games(i),:);
+    splines(i) = spap2(augknt(knots,order),order,gamedata.game_seconds_remaining,gamedata.home_wp);
+  end
 end
+
 
 %generate the correlation matrices
 
 correlation_L2 = zeros(numgames,numgames);
 correlation_H1 = zeros(numgames,numgames);
-
+tic
 %correlation is symmetric so only compute the strictly upper-triangular
 for i = 1:numgames
   for j = i+1:numgames
@@ -69,10 +99,14 @@ for i = 1:numgames
     correlation_H1(i,j) = sqrt(correlation_L2(i,j).^2 + H1_weight*diff(fnval(fnint(h1_spline),[0,3600])));
   end
 end
-
-% copy the upper to the lower
+toc
+% copy the upper to the lower   
 correlation_L2 = correlation_L2 + correlation_L2';
 correlation_H1 = correlation_H1 + correlation_H1';
 
 writematrix(correlation_H1,"correlation_H1.csv");
 writematrix(correlation_L2,"correlation_L2.csv");
+writematrix(is_game_flipped,"is_game_flipped.csv");
+%% How to plot a game
+%gamedata = T(T.game_id == games(i),:); %the game i you want to plot
+%plot(gamedata.game_seconds_remaining,gamedata.home_wp)

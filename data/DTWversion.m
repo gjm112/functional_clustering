@@ -3,6 +3,7 @@ clear;
 % load data
 T = readtable("NFL2023season_win_prob.csv");
 T = rmmissing(T);
+flipgames = true; 
 
 % transform the game_id to categorical.
 % Allows efficient manipulation of the table data
@@ -37,6 +38,21 @@ for i = 1:numgames
 end
 T = rmmissing(T);
 
+
+% Flip the games so that we are always plotting the loser 
+is_game_flipped = zeros(numgames,1);
+if flipgames
+    for i = 1:numgames
+        gamedata = T(T.game_id == games(i),:);
+        if gamedata.home_wp(end) > 0.9
+            % home team won, so flip home and away
+            gamedata.home_wp = 1-gamedata.home_wp;
+            is_game_flipped(i) = true;
+            %overwrite old data with new processed data
+            T(T.game_id == games(i),:) = gamedata;
+        end
+    end
+end
 
 %generate the correlation matrices
 
