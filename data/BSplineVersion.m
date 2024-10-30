@@ -1,7 +1,8 @@
 % constants and parameters
 clear;
 H1_weight = 1e3;
-use_optimal_knots = true; 
+use_optimal_knots = true; % for the cluster center algorithms assumes this
+                           % is true for now!!! 
 flipgames = true; 
 
 % load data
@@ -22,10 +23,18 @@ for i = 1:numgames
   gamedata = T(T.game_id == games(i),:);
   zero_index = find(gamedata.game_seconds_remaining == 0);
   % if the first index occurs before the length of the array that means we have overtime to account for. Rescale all data so its between 3600 and 0.
-  if zero_index(1) < length(gamedata.game_seconds_remaining)
-    overtime_seconds = gamedata.game_seconds_remaining(zero_index(1)+1); % hope that this works
-    gamedata.game_seconds_remaining(zero_index(1)+1:end) = gamedata.game_seconds_remaining(zero_index(1)+1:end) - overtime_seconds;
-    overtime_total = gamedata.game_seconds_remaining(zero_index(1)+1) - gamedata.game_seconds_remaining(end);
+  if ~isempty(zero_index) && zero_index(1) < length(gamedata.game_seconds_remaining)
+      %finding the index for where overtime starts
+      if length(zero_index) == 1
+          overtime_index = zero_index(1);
+      elseif zero_index(end) == length(gamedata.game_seconds_remaining)
+          overtime_index = zero_index(end-1);
+      else
+          overtime_index = zero_index(end);
+      end
+    overtime_seconds = gamedata.game_seconds_remaining(overtime_index+1); 
+    gamedata.game_seconds_remaining(overtime_index+1:end) = gamedata.game_seconds_remaining(overtime_index+1:end) - overtime_seconds;
+    overtime_total = -gamedata.game_seconds_remaining(end);
     %shift back to positives and rescale back to 3600 to 0
     gamedata.game_seconds_remaining = 3600/(3600+overtime_total)*(gamedata.game_seconds_remaining + overtime_total);
   end
@@ -61,7 +70,12 @@ end
 % With this we can generate a set of knots for the b-spline
 
 order = 4; %4 means cubic
-point_ratio = 0.4;
+order_other = 3;
+point_ratio = 0.2;
+finer_point_ratio = 0.3;
+small_number_points_threshold = 60;
+max_diff_threshold = 250;
+super_max_diff_threshold = 500;
 knots = linspace(0,3600,floor(point_ratio*minpoints));
 
 % generate the b-spline least-square approximations
@@ -69,14 +83,19 @@ knots = linspace(0,3600,floor(point_ratio*minpoints));
 if use_optimal_knots
   for i = 1:numgames
     gamedata = T(T.game_id == games(i),:);
-    splines(i) = spap2(floor(point_ratio*minpoints),order,gamedata.game_seconds_remaining,gamedata.home_wp);
-    if any(abs(splines(i).coefs) > 1.2) 
-      %maybe knot sequence isn't amazing so recompute
-     splines(i) = spap2(newknt(splines(i)),order,gamedata.game_seconds_remaining,gamedata.home_wp);
+    numpoints = length(gamedata.game_seconds_remaining);
+    t = sort(gamedata.game_seconds_remaining);
+    maxdiff = max(t(2:end) - t(1:(end-1)));
+    if maxdiff > super_max_diff_threshold
+        splines(i) = spap2(floor(finer_point_ratio*numpoints),2,gamedata.game_seconds_remaining,gamedata.home_wp);
+    elseif numpoints < small_number_points_threshold || maxdiff > max_diff_threshold
+        splines(i) = spap2(floor(finer_point_ratio*numpoints),order_other,gamedata.game_seconds_remaining,gamedata.home_wp);
+    else
+        splines(i) = spap2(floor(point_ratio*numpoints),order,gamedata.game_seconds_remaining,gamedata.home_wp);
     end
   end
 else
-  for i = 1:numgames
+    for i = 1:numgames
     gamedata = T(T.game_id == games(i),:);
     splines(i) = spap2(augknt(knots,order),order,gamedata.game_seconds_remaining,gamedata.home_wp);
   end
@@ -107,6 +126,12 @@ correlation_H1 = correlation_H1 + correlation_H1';
 writematrix(correlation_H1,"correlation_H1.csv");
 writematrix(correlation_L2,"correlation_L2.csv");
 writematrix(is_game_flipped,"is_game_flipped.csv");
+writecell(games,"gamenames.csv");
+writetable(T,"ProcessedData.csv");
+% Save splines
+save("UniformSplines.mat","splines");
+
+
 %% How to plot a game
 %gamedata = T(T.game_id == games(i),:); %the game i you want to plot
 %plot(gamedata.game_seconds_remaining,gamedata.home_wp)
