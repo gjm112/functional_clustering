@@ -21,10 +21,10 @@ figure;
 
 
 % generate the actual clusters here 
-C_l2 =  cluster(Z_l2,'MaxClust',10);
+C_l2 =  cluster(Z_l2,'MaxClust',5);
 numclusters_l2 = length(unique(C_l2));
 
-C_h1 =  cluster(Z_h1,'MaxClust',10);
+C_h1 =  cluster(Z_h1,'MaxClust',5);
 numclusters_h1 = length(unique(C_h1));
 
 % create the center b-splines for the given clusters
