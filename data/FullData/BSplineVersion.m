@@ -40,17 +40,30 @@ for i = 1:numgames
   end
   %change data to run from 0 to 3600 instead of 3600 to 0 for convenience of using b-splines and integration
   gamedata.game_seconds_remaining = 3600 - gamedata.game_seconds_remaining;
+
+  %check if the game is a tie, set for removal if so
+  if(gamedata.home_wp(end) == 0.5)
+    gamedata.home_wp = nan(size(gamedata.game_seconds_remaining));
+  end
+
   %Set repeat time values to NaN for later removal
   [~,index,~] = unique(gamedata.game_seconds_remaining,'stable');
   tmp = nan(size(gamedata.game_seconds_remaining));
   tmp(index) = gamedata.game_seconds_remaining(index);
   gamedata.game_seconds_remaining = tmp;
+
+
   %overwrite old data with new processed data
   T(T.game_id == games(i),:) = gamedata;
   
   numpoints(i) = length(index);
 end
 T = rmmissing(T);
+%redo categories as some games are gone
+T.game_id = categorical(T.game_id,unique(T.game_id));
+games = categories(T.game_id);
+numgames = length(games);
+
 minpoints = min(numpoints);
 
 % Flip the games so that we are always plotting the loser 

@@ -13,6 +13,8 @@ numgames = length(games);
 
 load("UniformSplines.mat");
 
+
+numties = 0;
 % Spline check is here
 for i = 1:numgames
      gamedata = T(T.game_id == games(i),:);
@@ -41,6 +43,13 @@ for i = 1:numgames
         plottitle = plottitle + " Exceeds the domain";
     end
 
+    %check tie games 
+    if gamedata.home_wp(end) == 0.5
+        dotheplot = true;
+        plottitle = [plottitle, "Tie Game"];
+        numties = numties + 1;
+    end
+    
     if dotheplot
         figure; fnplt(splines(i)); 
         hold on 
