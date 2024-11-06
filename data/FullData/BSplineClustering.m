@@ -1,6 +1,8 @@
 clc
 clear
 
+numclusters = 10;
+
 cor_l2 = readmatrix("correlation_L2.csv");
 cor_h1 = readmatrix("correlation_H1.csv");
 load("UniformSplines.mat");
@@ -21,25 +23,23 @@ figure;
 
 
 % generate the actual clusters here 
-C_l2 =  cluster(Z_l2,'MaxClust',5);
-numclusters_l2 = length(unique(C_l2));
+C_l2 =  cluster(Z_l2,'MaxClust',numclusters);
 
-C_h1 =  cluster(Z_h1,'MaxClust',5);
-numclusters_h1 = length(unique(C_h1));
+C_h1 =  cluster(Z_h1,'MaxClust',numclusters);
 
 % create the center b-splines for the given clusters
 
-for i = 1:numclusters_l2
+for i = 1:numclusters
     center_l2(i) = NonUniformBSplineCenter(splines(C_l2 == i));
 end
 
-for i = 1:numclusters_h1
+for i = 1:numclusters
     center_h1(i) = NonUniformBSplineCenter(splines(C_h1 == i));
 end
 
 % plot the clusters and centers 
-clusterstoplot = 1:numclusters_l2;
-l2savefolder = "Figures/L2 " + num2str(numclusters_l2) + " clusters";
+clusterstoplot = 1:numclusters;
+l2savefolder = "Figures/L2 " + num2str(numclusters) + " clusters";
 status = mkdir(l2savefolder);
 
 for currentcluster = clusterstoplot
@@ -57,8 +57,8 @@ for currentcluster = clusterstoplot
 end
 
 % plot the clusters and centers 
-clusterstoplot = 1:numclusters_h1;
-h1savefolder = "Figures/H1 " + num2str(numclusters_l2) + " clusters";
+clusterstoplot = 1:numclusters;
+h1savefolder = "Figures/H1 " + num2str(numclusters) + " clusters";
 status = mkdir(h1savefolder);
 
 for currentcluster = clusterstoplot
@@ -84,6 +84,7 @@ game_ids.Properties.VariableNames = ["Year", "Game Number", "Home Team", "Away T
 game_ids.("L_2 Cluster") = C_l2;
 game_ids.("H_1 Cluster") = C_h1;
 
-writetable(game_ids,"ClusterInfo_" + num2str(numclusters_l2) + ".csv");
+clusterfolder = "Cluster Info/";
+writetable(game_ids,clusterfolder + "ClusterInfo_" + num2str(numclusters) + ".csv");
 % Save centers
-save("ClusterCenters_"+ num2str(numclusters_l2) +".mat","center_l2","center_h1");
+save(clusterfolder+"ClusterCenters_"+ num2str(numclusters) +".mat","center_l2","center_h1");
