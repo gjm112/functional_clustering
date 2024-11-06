@@ -17,13 +17,15 @@ rel_diff = (tri_h1-tri_l2)./tri_l2;
 
 [row,col] = find(rel_diff >= relative_difference_to_plot);
 
+status = mkdir("Figures/Temp")
+
 % plot splines that have h1 norm relatively larger than l2
 for i = 1:length(row)
     figure; 
 
     hold on
     fnplt(splines(row(i)));
-    fnplt(splines(col(i)));x
+    fnplt(splines(col(i)));
     hold off
 
     title(["Spline " + num2str(row(i)) + " and Spline " + num2str(col(i)), "have" + ...
