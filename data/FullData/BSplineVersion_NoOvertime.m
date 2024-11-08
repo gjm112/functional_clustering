@@ -167,5 +167,6 @@ save("Splines_no_overtime.mat","splines");
 writecell(games(nonordered_data),"gamenames_unordered.csv");
 
 %% How to plot a game
+%T.game_id = categorical(T.game_id);  %only 1 time needed
 %gamedata = T(T.game_id == games(i),:); %the game i you want to plot
 %plot(gamedata.game_seconds_remaining,gamedata.home_wp)

@@ -1,7 +1,7 @@
 clc
 clear
 
-numclusters = 5;
+numclusters = 7;
 
 cor_l2 = readmatrix("cor_L2_no_overtime.csv");
 cor_h1 = readmatrix("cor_H1_no_overtime.csv");
