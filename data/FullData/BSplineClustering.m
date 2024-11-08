@@ -1,7 +1,7 @@
 clc
 clear
 
-numclusters = 10;
+numclusters = 5;
 
 cor_l2 = readmatrix("correlation_L2.csv");
 cor_h1 = readmatrix("correlation_H1.csv");
@@ -77,7 +77,7 @@ end
 
 % save the cluster information to file
 
-game_ids = readtable("gamenames.csv");
+game_ids = readtable("gamenames_no_overtime.csv");
 game_ids.Properties.VariableNames = ["Year", "Game Number", "Home Team", "Away Team"];
 
 % add the cluster info
@@ -85,6 +85,6 @@ game_ids.("L_2 Cluster") = C_l2;
 game_ids.("H_1 Cluster") = C_h1;
 
 clusterfolder = "Cluster Info/";
-writetable(game_ids,clusterfolder + "ClusterInfo_" + num2str(numclusters) + ".csv");
+writetable(game_ids,clusterfolder + "ClusterInfo" + num2str(numclusters) + ".csv");
 % Save centers
 save(clusterfolder+"ClusterCenters_"+ num2str(numclusters) +".mat","center_l2","center_h1");

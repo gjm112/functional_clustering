@@ -2,7 +2,7 @@
 % much, and makes figures for the plots if they are. 
 
 %% First load data
-T = readtable("ProcessedData.csv");
+T = readtable("ProcessedData_no_overtime.csv");
 % transform the game_id to categorical. Allows efficient manipulation of the table data
 T.game_id = categorical(T.game_id);
 games = categories(T.game_id);
@@ -11,7 +11,7 @@ numgames = length(games);
 
 %% load in splines 
 
-load("UniformSplines.mat");
+load("Splines_no_overtime.mat");
 
 
 numties = 0;

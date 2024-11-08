@@ -45,13 +45,6 @@ for i = 1:numgames
       end
   end
 
-  %check that game data is sorted in descending order. If not mark game 
-  % for removal
-  if ~issorted(gamedata.game_seconds_remaining,'descend')
-      nonordered_data(i) = true;
-      gamedata.home_wp = nan(size(gamedata.game_seconds_remaining));
-  end
-
   %change data to run from 0 to 3600 instead of 3600 to 0 for convenience of using b-splines and integration
   gamedata.game_seconds_remaining = 3600 - gamedata.game_seconds_remaining;
 
@@ -61,7 +54,6 @@ for i = 1:numgames
   tmp(index) = gamedata.game_seconds_remaining(index);
   gamedata.game_seconds_remaining = tmp;
 
-
   %overwrite old data with new processed data
   T(T.game_id == games(i),:) = gamedata;
   
@@ -69,8 +61,18 @@ for i = 1:numgames
 end
 T = rmmissing(T);
 
-%save the unordered gamenames that were removed 
-writecell(games(nonordered_data),"gamenames_unordered.csv");
+% now pass through and remove games with unordered data 
+
+for i = 1:numgames
+    gamedata = T(T.game_id == games(i),:);
+    nonordered_data(i) = ~issorted(gamedata.game_seconds_remaining,'ascend');
+    if nonordered_data(i) 
+        % mark game for removal
+        gamedata.game_seconds_remaining(:) = nan;
+        T(T.game_id == games(i),:) = gamedata;
+    end
+end
+T = rmmissing(T);
 
 % adjust indices for after game removal
 overtime_game = overtime_game(~nonordered_data);
@@ -97,6 +99,7 @@ if flipgames
         end
     end
 end
+
 % With this we can generate a set of knots for the b-spline
 
 order = 4; %4 means cubic
@@ -160,7 +163,8 @@ writecell(games,"gamenames_no_overtime.csv");
 writetable(T,"ProcessedData_no_overtime.csv");
 % Save splines
 save("Splines_no_overtime.mat","splines");
-
+%save the unordered gamenames that were removed 
+writecell(games(nonordered_data),"gamenames_unordered.csv");
 
 %% How to plot a game
 %gamedata = T(T.game_id == games(i),:); %the game i you want to plot
