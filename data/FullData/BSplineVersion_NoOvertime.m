@@ -159,6 +159,7 @@ correlation_H1 = correlation_H1 + correlation_H1';
 writematrix(correlation_H1,"cor_H1_no_overtime.csv");
 writematrix(correlation_L2,"cor_L2_no_overtime.csv");
 writematrix(is_game_flipped,"is_game_flipped_no_overtime.csv");
+writematrix(overtime_game, "overtimegame_no_overtime.csv")
 writecell(games,"gamenames_no_overtime.csv");
 writetable(T,"ProcessedData_no_overtime.csv");
 % Save splines
