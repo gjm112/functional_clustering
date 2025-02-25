@@ -61,7 +61,11 @@ for i = 1:numgames
 end
 T = rmmissing(T);
 
-% now pass through and remove games with unordered data 
+% now pass through and remove games with unordered data
+
+% Note: this ends up removing 44 games (there were 51 games with unordered data,
+% but 7 of these only have unordered data in their overtime, so aren't
+% removed here). 
 
 for i = 1:numgames
     gamedata = T(T.game_id == games(i),:);

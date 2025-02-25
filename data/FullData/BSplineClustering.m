@@ -77,7 +77,7 @@ end
 
 % save the cluster information to file
 
-game_ids = readtable("gamenames_no_overtime.csv");
+game_ids = readtable("gamenames.csv");
 game_ids.Properties.VariableNames = ["Year", "Game Number", "Home Team", "Away Team"];
 
 % add the cluster info
