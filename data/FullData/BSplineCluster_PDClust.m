@@ -1,29 +1,34 @@
-clc
-clear
-
-numclusters = 5;
-make_figures = false; 
-
-cor_l2 = readmatrix("correlation_L2.csv");
-cor_h1 = readmatrix("correlation_H1.csv");
-load("UniformSplines.mat");
-
-% generate the actual clusters here 
-[C_l2,~,p_l2] =  PDclust(cor_l2,numclusters);
-
-[C_h1,~,p_h1] =  PDclust(cor_h1,numclusters);
+% clc
+% clear
+% 
+% numclusters = 5;
+% make_figures = true; 
+% 
+% cor_l2 = readmatrix("correlation_L2.csv");
+% cor_h1 = readmatrix("correlation_H1.csv");
+% load("UniformSplines.mat");
+% 
+% % generate the actual clusters here 
+% [C_l2,~,p_l2] =  PDclust(cor_l2,numclusters);
+% 
+% [C_h1,~,p_h1] =  PDclust(cor_h1,numclusters);
 
 % create the center b-splines for the given clusters
 
 for i = 1:numclusters
-    center_l2(i) = NonUniformBSplineCenter(splines(C_l2 == i));
+    center_l2(i) = NonUniformBSplineCenter(splines(C_l2 == i),p_l2(C_l2 == i,i));
 end
 
 for i = 1:numclusters
-    center_h1(i) = NonUniformBSplineCenter(splines(C_h1 == i));
+    center_h1(i) = NonUniformBSplineCenter(splines(C_h1 == i), p_h1(C_h1 == i,i));
 end
 
 if make_figures
+    %continous colormap function 
+    
+    %based on winter colormap
+    mycolormap = @(x) [0, x, 1-x/2 x/2]; 
+
     % plot the clusters and centers
     clusterstoplot = 1:numclusters;
     l2savefolder = "PD Figures/L2 " + num2str(numclusters) + " clusters";
@@ -33,10 +38,13 @@ if make_figures
         figure;
         hold on;
         pltsplines = splines(C_l2 == currentcluster);
+        plt_p = p_l2(C_l2 == currentcluster,currentcluster);
         for i = 1:sum(C_l2 == currentcluster)
-            fnplt(pltsplines(i),'k--',0.1);
+            points = fnplt(pltsplines(i),1);
+            %adjusts transparancy based on probability in cluster
+            plot(points(1,:), points(2,:), 'Color', mycolormap(plt_p(i))); 
         end
-        fnplt(center_l2(currentcluster));
+        fnplt(center_l2(currentcluster),'k');
         plottitle = "$L^2$ Cluster " + num2str(currentcluster);
         hold off
         title(plottitle,'Interpreter','latex');
@@ -47,13 +55,17 @@ if make_figures
     clusterstoplot = 1:numclusters;
     h1savefolder = "PD Figures/H1 " + num2str(numclusters) + " clusters";
     status = mkdir(h1savefolder);
+    mycolormap = @(x) [0, 0, 0, x/2]; 
 
     for currentcluster = clusterstoplot
         figure;
         hold on;
         pltsplines = splines(C_h1 == currentcluster);
+        plt_p = p_h1(C_h1 == currentcluster,currentcluster);
         for i = 1:sum(C_h1 == currentcluster)
-            fnplt(pltsplines(i),'k--',0.1);
+            points = fnplt(pltsplines(i),1);
+            %adjusts transparancy based on probability in cluster
+            plot(points(1,:), points(2,:), 'Color', mycolormap(plt_p(i))); 
         end
         fnplt(center_h1(currentcluster));
         plottitle = "$H^1$ Cluster " + num2str(currentcluster);

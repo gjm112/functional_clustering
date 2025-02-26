@@ -1,4 +1,12 @@
-function [center] = NonUniformBSplineCenter(Splines)
+function [center] = NonUniformBSplineCenter(Splines, w)
+% w  - optional weights for computing the center
+
+arguments
+    Splines
+    w (:,1) double = ones(length(Splines),1);
+end
+
+
 % Computes the approximate center of a set of BSplines
 
 numsplines = length(Splines);
@@ -12,12 +20,12 @@ values = chbpnt(augknots,order);
 
 %start up
 tempspline = spapi(augknots,values,fnval(Splines(1),values));
-a = tempspline.coefs;
+a = w(1)*tempspline.coefs;
 for i = 2:numsplines
     tempspline = spapi(augknots,values,fnval(Splines(i),values));
-    a = a + tempspline.coefs;
+    a = a + w(i)*tempspline.coefs;
 end
-a = a/numsplines;
+a = a/sum(w);
 
 c_coef = a;
 
