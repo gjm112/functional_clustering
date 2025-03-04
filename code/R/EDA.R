@@ -1,3 +1,9 @@
+#newest file /Users/gregorymatthews/Dropbox/functional_clusteringgit2/data/FullData/PD Cluster Info/CluserInfo5.csv
+#newest file /Users/gregorymatthews/Dropbox/functional_clusteringgit2/data/FullData/No overtime cluster info PD Cluster Info/CluserInfo5.csv
+
+#Chi squared testing to look for relationbshjpos between week and cluster
+#Data viz game time on x axis, y axis win prob, 
+
 library(tidyverse)
 #number of clusters 
 k <- 5
@@ -10,8 +16,11 @@ dat <- dat %>% mutate(Decade = case_when(Year <= 2009 ~ "1999-2009",
 #Fill in zeroes
 library(tidyverse)
 dat %>% group_by(L_2.Cluster, Year) %>% summarize(n = n())
-years <- data.frame(Year = 1999:2023, L_2.Cluster = rep(1:k,each = 25))
-all <- years %>% left_join(dat %>% group_by(L_2.Cluster, Year, Decade) %>% summarize(n = n()), by = c("Year","L_2.Cluster")) 
+years <- data.frame(Year = 1999:2023, L_2.Cluster = rep(1:k, each = 25))
+all <- years %>% left_join(
+  dat %>% group_by(L_2.Cluster, Year, Decade) %>% summarize(n = n()),
+  by = c("Year", "L_2.Cluster")
+)
 all$n[is.na(all$n)] <- 0
 
 all  %>% ggplot(aes(y = n, x = Year, col = Decade)) + geom_point() + geom_path() +  facet_wrap(~L_2.Cluster, scales = "free_y") + geom_smooth()
