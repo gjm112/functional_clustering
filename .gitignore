@@ -4,4 +4,5 @@
 data/FullData/correlation*
 data/FullData/Figures/Temp/*
 data/FullData/cor_*
+data/FullData/*Cluster Info*/GregFormat*.csv
 .Rproj.user

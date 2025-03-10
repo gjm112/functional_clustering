@@ -1,8 +1,9 @@
 % clc
 % clear
 % 
-numclusters = 5;
+numclusters = 10;
 make_figures = true;
+save_in_long_format = true; %save thing's in Greg's format as well.
 
 cor_l2 = readmatrix("correlation_L2.csv");
 cor_h1 = readmatrix("correlation_H1.csv");
@@ -92,5 +93,37 @@ clusterfolder = "PD Cluster Info/";
 status = mkdir(clusterfolder);
 
 writetable(game_ids,clusterfolder + "ClusterInfo" + num2str(numclusters) + ".csv");
+
 % Save centers
-save(clusterfolder+"ClusterCenters_"+ num2str(numclusters) +".mat","center_l2","center_h1");
+save(clusterfolder+"ClusterCenters_"+ num2str(numclusters) +".mat","center_l2","center_h1")
+
+% also store things in the Greg format
+if save_in_long_format
+    if ~ isfile("SplinePointEval.csv")
+        savespline_points;
+    end
+    
+    spline_data = readtable("SplinePointEval.csv", "Delimiter",",");
+    spline_data.GameID = categorical(spline_data.GameID);
+    games = categories(spline_data.GameID);
+
+    % preallocate entries
+
+    spline_data.("L_2 Cluster") = NaN(height(spline_data),1);
+    spline_data.("L_2 Cluster Probability") = NaN(height(spline_data),numclusters);
+    spline_data.("H_1 Cluster") = NaN(height(spline_data),1);
+    spline_data.("H_1 Cluster Probability") = NaN(height(spline_data),numclusters);
+
+    % add duplicated cluster info to file
+
+    for i = 1:length(games)
+        indices = find(spline_data.GameID == games(i));
+        spline_data{indices(1):indices(end), "L_2 Cluster"} = C_l2(i);
+        spline_data{indices(1):indices(end), "L_2 Cluster Probability"} = repmat(p_l2(i,:),length(indices),1);
+        spline_data{indices(1):indices(end), "H_1 Cluster"} = C_h1(i);
+        spline_data{indices(1):indices(end), "H_1 Cluster Probability"} = repmat(p_h1(i,:),length(indices),1);
+    end
+    writetable(spline_data,clusterfolder + "GregFormatClusters" + num2str(numclusters) + ".csv");
+end
+
+
