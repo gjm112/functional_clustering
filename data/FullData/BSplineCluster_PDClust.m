@@ -57,7 +57,7 @@ if make_figures
     clusterstoplot = 1:numclusters;
     h1savefolder = "PD Figures/H1 " + num2str(numclusters) + " clusters";
     status = mkdir(h1savefolder);
-    mycolormap = @(x) [0, 0, 0, x/2]; 
+    mycolormap = @(x) [0, x, 1-x/2 x/2]; % R G B Transparency all in [0,1]
 
     for currentcluster = clusterstoplot
         figure;

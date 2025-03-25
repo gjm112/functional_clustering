@@ -1,8 +1,7 @@
 % constants and parameters
 clear;
 H1_weight = 1e3;
-use_optimal_knots = true; % for the cluster center algorithms assumes this
-                           % is true for now!!! 
+use_optimal_knots = true;
 flipgames = true; 
 
 % load data
@@ -145,6 +144,9 @@ writetable(T,"ProcessedData.csv");
 save("UniformSplines.mat","splines");
 
 %% How to plot a game
+%T = readtable('ProcessedData.csv');
 %T.game_id = categorical(T.game_id);  %only 1 time needed
+%games = categories(T.game_id);
 %gamedata = T(T.game_id == games(i),:); %the game i you want to plot
 %plot(gamedata.game_seconds_remaining,gamedata.home_wp)
+%games(i) tells you the name of the game 
