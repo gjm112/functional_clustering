@@ -1,7 +1,7 @@
 clc
 clear
 
-numclusters = 5;
+numclusters = 1;
 make_figures = true;
 save_in_long_format = false; %save thing's in Greg's format as well.
 
@@ -19,5 +19,5 @@ end
 
 % also store things in the Greg format
 if save_in_long_format
-    save_gregformat(c_l2,p_l2,c_h1,p_h1,"PD Cluster Info");
+    save_gregformat(c_l2,p_l2,c_h1,p_h1,numclusters,"PD Cluster Info");
 end

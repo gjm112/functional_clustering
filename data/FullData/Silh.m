@@ -21,5 +21,6 @@ barsh=barh(ss,1.0);
     if n > 50
         shading flat
     end
+    xline(mean(ds),'k--','Linewidth',2);
     xlabel('Silhouette Value');
     ylabel('Cluster');

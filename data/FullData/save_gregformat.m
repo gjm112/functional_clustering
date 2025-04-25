@@ -1,4 +1,4 @@
-function save_gregformat(c_l2,p_l2,c_h1,p_h1,savedirectory)
+function save_gregformat(c_l2,p_l2,c_h1,p_h1,numclusters,savedirectory)
 
 if ~ isfile("SplinePointEval.csv")
     savespline_points;

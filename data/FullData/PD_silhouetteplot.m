@@ -11,10 +11,10 @@ load("UniformSplines.mat");
 game_ids = readtable("gamenames.csv");
 filedirectory = "PD Cluster Info";
 
-status = mkdir(plotfolder + "/H1");
-status = mkdir(plotfolder + "/L2");
-status = mkdir(plotfolder + "/probabilisticL2");
-status = mkdir(plotfolder + "/probabilisticH1");
+mkdir(plotfolder + "/H1");
+mkdir(plotfolder + "/L2");
+mkdir(plotfolder + "/probabilisticL2");
+mkdir(plotfolder + "/probabilisticH1");
 
 
 for numclusters = clusterstoplot
@@ -29,11 +29,13 @@ for numclusters = clusterstoplot
 
     figure;
     [s_l2, plot_l2] = silhouette(cor_l2,c_l2,"Euclidean");
+    xline(mean(s_l2),'k--','Linewidth',2);
     title("$L_2$ for " + num2str(numclusters) + " Clusters", "Interpreter","latex");
     saveas(gcf,plotfolder+ "/L2/" + num2str(numclusters) + "clusters","jpeg");
 
     figure;
     [s_h1,plot_h1] = silhouette(cor_h1,c_h1,"Euclidean");
+    xline(mean(s_h1),'k--','Linewidth',2);
     title("$H_1$ for " + num2str(numclusters) + " Clusters", "Interpreter","latex");
     saveas(gcf,plotfolder+ "/H1/" + num2str(numclusters) + "clusters","jpeg");
 
