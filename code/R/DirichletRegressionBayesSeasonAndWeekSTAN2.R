@@ -85,6 +85,7 @@ for (w in 1:W){print(w)
                                   t = t, 
                                   k = k, 
                                   iter = 1:2000,
+                                  beta_int = test$beta_0[,k],
                                   beta_week = test$beta_week[,w,k],
                                   beta_year = test$beta_year[,t,k],
                                   alpha = exp(test$beta_0[,k] + test$beta_week[,w,k] + test$beta_year[,t,k])))
@@ -92,6 +93,9 @@ for (w in 1:W){print(w)
     }
   }
 }
+
+
+results[1,]
 
 ggplot(aes(x = beta_year),data = results %>% filter(t != 1)) + geom_density() + facet_grid(k~factor(t))
 
@@ -176,3 +180,21 @@ library(tidyverse)
 ggplot(aes(x = Year, y = MoV), data = nfl %>% filter(Year >= 1998)) + geom_point() + geom_path()
 
 
+
+
+library(ggtern)
+testweek <- results %>% 
+  group_by(w, t, iter) %>%
+  mutate(p = alpha / sum(alpha)) %>% 
+  group_by(w,k,iter) %>%
+  summarize(mean = mean(p)) %>% 
+  pivot_wider(names_from = k, values_from = mean)
+names(testweek) <- c("w","iter","c1","c2","c3")
+
+ggtern(data = testweek, aes(c1, c2, c3)) +
+  geom_point(aes(color = factor(w)), alpha = 0.25) + 
+  theme_bw()  + tern_limits(T= 0.35 , L=0.5 , R= 0.5 ) 
+
+ggtern(data = testweek, aes(c1, c2, c3)) +
+  geom_point(aes(color = factor(w)), alpha = 0.25) + 
+  theme_bw()  + tern_limits(T= 0.35 , L=0.5 , R= 0.5 ) + facet_wrap(~w)
