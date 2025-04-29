@@ -37,7 +37,7 @@ model {
     for (w in 1:W){
       beta_week[w,k] ~ normal(0,sigma_week[k]);
     }
-    for (t in 2:T){
+    for (t in 1:T){
       beta_year[t,k] ~ normal(0,sigma_year[k]);  
     }
   }
