@@ -41,7 +41,7 @@ fit <- stan(file = "/Users/gregorymatthews/Dropbox/functional_clusteringgit2/cod
             chains = 4, 
             cores = 4)
 
-save(fit, file = "/Users/gregorymatthews/Dropbox/function_clusgteringgit/data/fit20250425.RData")
+save(fit, file = "/Users/gregorymatthews/Dropbox/functional_clusteringgit2/data/fit20250425.RData")
 
 
 
