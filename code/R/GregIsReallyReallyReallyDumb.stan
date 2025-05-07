@@ -1,28 +1,28 @@
-
 data {
   int<lower=0> N;
   int<lower=0> K;
   int<lower=0> T;
   int<lower=0> W;
   matrix[N,K] probs;
-  int sched[N,2];
+  matrix[N,T-1] X_year;
+  matrix[N,W-1] X_week;
+  matrix[T,T-1] contr_year;
+  matrix[W,W-1] contr_week;
 }
 
 parameters {
   vector[K] beta_0;
-  matrix[W,K] beta_week;
-  matrix[T,K] beta_year;
-  vector<lower=0>[K] sigma_week;
-  vector<lower=0>[K] sigma_year;
+  matrix[W-1,K] b_week;
+  matrix[T-1,K] b_year;
 }
 
 transformed parameters {
   matrix[N,K] alpha;
   for (k in 1:K) {
-    for (i in 1:N) {
-      alpha[i,k] = exp(beta_0[k] + beta_year[sched[i,2],k] + beta_week[sched[i,1],k]);
-    }
+    alpha[,k] = exp(beta_0[k] + X_year * b_year[,k] + X_week * b_week[,k]);
   }
+  matrix[T,K] beta_year = contr_year * b_year;
+  matrix[W,K] beta_week = contr_week * b_week;
 }
 
 model {
@@ -30,16 +30,8 @@ model {
     to_vector(probs[i,]) ~ dirichlet(alpha[i,]);
   }
   
-  beta_0 ~ normal(0,100);
-  sigma_week ~ normal(0,100);
-  sigma_year ~ normal(0,100);
-  for (k in 1:K){
-    for (w in 1:W){
-      beta_week[w,k] ~ normal(0,sigma_week[k]);
-    }
-    for (t in 1:T){
-      beta_year[t,k] ~ normal(0,sigma_year[k]);  
-    }
-  }
+  beta_0 ~ normal(0,10);
+  to_vector(b_week) ~ normal(0,10);
+  to_vector(b_year) ~ normal(0,10);
 }
 
